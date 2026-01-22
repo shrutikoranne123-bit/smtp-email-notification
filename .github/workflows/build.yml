@@ -1,0 +1,42 @@
+name: ARM64 Docker Build
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build ARM64 image
+        run: |
+          docker buildx build \
+            --platform linux/arm64 \
+            -t arm64-demo:latest \
+            .
+
+      # 🔴 Email on build failure
+      - name: Notify Build Failure
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_HOST }}
+          server_port: 587
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "❌ Build Failed – ${{ github.repository }}"
+          to: ${{ secrets.SMTP_TO }}
+          from: ${{ secrets.SMTP_FROM }}
+          body: |
+            Build failed ❌
+            Repo: ${{ github.repository }}
+            Commit: ${{ github.sha }}

@@ -1,0 +1,53 @@
+name: Deploy to EC2
+
+on:
+  workflow_run:
+    workflows: ["ARM64 Docker Build"]
+    types: [completed]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy
+        run: |
+          ssh ec2-user@<EC2_PUBLIC_IP> << EOF
+          docker rm -f arm64-demo || true
+          docker run -d \
+            --name arm64-demo \
+            -p 3000:3000 \
+            arm64-demo:latest
+          EOF
+
+      # ✅ Success email
+      - name: Notify Deployment Success
+        if: success()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_HOST }}
+          server_port: 587
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "🚀 Deployment Successful"
+          to: ${{ secrets.SMTP_TO }}
+          from: ${{ secrets.SMTP_FROM }}
+          body: |
+            Deployment successful ✅
+            Repo: ${{ github.repository }}
+
+      # ❌ Failure email
+      - name: Notify Deployment Failure
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_HOST }}
+          server_port: 587
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "❌ Deployment Failed"
+          to: ${{ secrets.SMTP_TO }}
+          from: ${{ secrets.SMTP_FROM }}
+          body: |
+            Deployment failed ❌
+            Check GitHub Actions logs.
