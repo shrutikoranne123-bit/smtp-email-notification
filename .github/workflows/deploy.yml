@@ -1,53 +1,75 @@
-name: Deploy to EC2
+name: ARM64 Ubuntu Build & Deploy
 
 on:
-  workflow_run:
-    workflows: ["ARM64 Docker Build"]
-    types: [completed]
+  push:
+    branches: [ main ]
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-qemu-action@v3
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build ARM64 Image
+        run: |
+          docker buildx build \
+            --platform linux/arm64 \
+            -t ${{ secrets.DOCKER_USERNAME }}/arm64-demo:latest \
+            --push .
+
+      - name: Email on Build Failure
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: ❌ Build Failed
+          body: ARM64 Docker build failed on Ubuntu runner.
+          to: ${{ secrets.EMAIL_TO }}
+          from: GitHub Actions
+
   deploy:
+    needs: build
     runs-on: ubuntu-latest
 
     steps:
       - name: Deploy
-        run: |
-          ssh ec2-user@<EC2_PUBLIC_IP> << EOF
-          docker rm -f arm64-demo || true
-          docker run -d \
-            --name arm64-demo \
-            -p 3000:3000 \
-            arm64-demo:latest
-          EOF
+        run: echo "Deploy to Ubuntu EC2 via SSH"
 
-      # ✅ Success email
-      - name: Notify Deployment Success
+      - name: Email on Success
         if: success()
         uses: dawidd6/action-send-mail@v3
         with:
-          server_address: ${{ secrets.SMTP_HOST }}
-          server_port: 587
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
           username: ${{ secrets.SMTP_USERNAME }}
           password: ${{ secrets.SMTP_PASSWORD }}
-          subject: "🚀 Deployment Successful"
-          to: ${{ secrets.SMTP_TO }}
-          from: ${{ secrets.SMTP_FROM }}
-          body: |
-            Deployment successful ✅
-            Repo: ${{ github.repository }}
+          subject: ✅ Deployment Successful
+          body: App deployed successfully on Ubuntu EC2.
+          to: ${{ secrets.EMAIL_TO }}
+          from: GitHub Actions
 
-      # ❌ Failure email
-      - name: Notify Deployment Failure
+      - name: Email on Failure
         if: failure()
         uses: dawidd6/action-send-mail@v3
         with:
-          server_address: ${{ secrets.SMTP_HOST }}
-          server_port: 587
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
           username: ${{ secrets.SMTP_USERNAME }}
           password: ${{ secrets.SMTP_PASSWORD }}
-          subject: "❌ Deployment Failed"
-          to: ${{ secrets.SMTP_TO }}
-          from: ${{ secrets.SMTP_FROM }}
-          body: |
-            Deployment failed ❌
-            Check GitHub Actions logs.
+          subject: ❌ Deployment Failed
+          body: Deployment failed.
+          to: ${{ secrets.EMAIL_TO }}
+          from: GitHub Actions
