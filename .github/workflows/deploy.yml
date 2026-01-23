@@ -37,7 +37,7 @@ jobs:
           password: ${{ secrets.SMTP_PASSWORD }}
           subject: ❌ Build Failed
           body: ARM64 Docker build failed on Ubuntu runner.
-          to: ${{ secrets.SMTP_FROM }}
+          to: ${{ secrets.SMTP_TO }}
           from: ${{ secrets.SMTP_FROM }}
 
   deploy:
@@ -58,7 +58,7 @@ jobs:
           password: ${{ secrets.SMTP_PASSWORD }}
           subject: ✅ Deployment Successful
           body: App deployed successfully on Ubuntu EC2.
-          to: ${{ secrets.SMTP_FROM }}
+          to: ${{ secrets.SMTP_TO }}
           from: ${{ secrets.SMTP_FROM }}
 
       - name: Email on Deployment Failure
@@ -71,5 +71,5 @@ jobs:
           password: ${{ secrets.SMTP_PASSWORD }}
           subject: ❌ Deployment Failed
           body: Deployment failed.
-          to: ${{ secrets.SMTP_FROM }}
+          to: ${{ secrets.SMTP_TO }}
           from: ${{ secrets.SMTP_FROM }}
