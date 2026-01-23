@@ -31,13 +31,13 @@ jobs:
         if: failure()
         uses: dawidd6/action-send-mail@v3
         with:
-          server_address: ${{ secrets.SMTP_SERVER }}
-          server_port: ${{ secrets.SMTP_PORT }}
+          server_address: ${{ secrets.SMTP_HOST }}
+          #server_port: ${{ secrets.SMTP_PORT }}
           username: ${{ secrets.SMTP_USERNAME }}
           password: ${{ secrets.SMTP_PASSWORD }}
           subject: ❌ Build Failed
           body: ARM64 Docker build failed on Ubuntu runner.
-          to: ${{ secrets.EMAIL_TO }}
+          to: ${{ secrets.SMTP_TO }}
           from: GitHub Actions
 
   deploy:
@@ -48,28 +48,28 @@ jobs:
       - name: Deploy
         run: echo "Deploy to Ubuntu EC2 via SSH"
 
-      - name: Email on Success
+      - name: Email on Deployment Success
         if: success()
         uses: dawidd6/action-send-mail@v3
         with:
-          server_address: ${{ secrets.SMTP_SERVER }}
-          server_port: ${{ secrets.SMTP_PORT }}
+          server_address: ${{ secrets.SMTP_HOST }}
+          #server_port: ${{ secrets.SMTP_PORT }}
           username: ${{ secrets.SMTP_USERNAME }}
           password: ${{ secrets.SMTP_PASSWORD }}
           subject: ✅ Deployment Successful
           body: App deployed successfully on Ubuntu EC2.
-          to: ${{ secrets.EMAIL_TO }}
+          to: ${{ secrets.SMTP_TO }}
           from: GitHub Actions
 
-      - name: Email on Failure
+      - name: Email on Deployment Failure
         if: failure()
         uses: dawidd6/action-send-mail@v3
         with:
-          server_address: ${{ secrets.SMTP_SERVER }}
-          server_port: ${{ secrets.SMTP_PORT }}
+          server_address: ${{ secrets.SMTP_HOST }}
+          #server_port: ${{ secrets.SMTP_PORT }}
           username: ${{ secrets.SMTP_USERNAME }}
           password: ${{ secrets.SMTP_PASSWORD }}
           subject: ❌ Deployment Failed
           body: Deployment failed.
-          to: ${{ secrets.EMAIL_TO }}
+          to: ${{ secrets.SMTP_TO }}
           from: GitHub Actions
