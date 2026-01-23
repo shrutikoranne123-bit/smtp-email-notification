@@ -38,7 +38,7 @@ jobs:
           subject: ❌ Build Failed
           body: ARM64 Docker build failed on Ubuntu runner.
           to: ${{ secrets.SMTP_TO }}
-          from: GitHub Actions
+          from: ${{ secrets.SMTP_FROM }}
 
   deploy:
     needs: build
@@ -59,7 +59,7 @@ jobs:
           subject: ✅ Deployment Successful
           body: App deployed successfully on Ubuntu EC2.
           to: ${{ secrets.SMTP_TO }}
-          from: GitHub Actions
+          from: ${{ secrets.SMTP_FROM }}
 
       - name: Email on Deployment Failure
         if: failure()
@@ -72,4 +72,4 @@ jobs:
           subject: ❌ Deployment Failed
           body: Deployment failed.
           to: ${{ secrets.SMTP_TO }}
-          from: GitHub Actions
+          from: ${{ secrets.SMTP_FROM }}
