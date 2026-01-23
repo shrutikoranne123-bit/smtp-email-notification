@@ -32,12 +32,12 @@ jobs:
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: ${{ secrets.SMTP_HOST }}
-          #server_port: ${{ secrets.SMTP_PORT }}
+          server_port: ${{ secrets.SMTP_PORT }}
           username: ${{ secrets.SMTP_USERNAME }}
           password: ${{ secrets.SMTP_PASSWORD }}
           subject: ❌ Build Failed
           body: ARM64 Docker build failed on Ubuntu runner.
-          to: ${{ secrets.SMTP_TO }}
+          to: ${{ secrets.SMTP_FROM }}
           from: ${{ secrets.SMTP_FROM }}
 
   deploy:
@@ -53,12 +53,12 @@ jobs:
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: ${{ secrets.SMTP_HOST }}
-          #server_port: ${{ secrets.SMTP_PORT }}
+          server_port: ${{ secrets.SMTP_PORT }}
           username: ${{ secrets.SMTP_USERNAME }}
           password: ${{ secrets.SMTP_PASSWORD }}
           subject: ✅ Deployment Successful
           body: App deployed successfully on Ubuntu EC2.
-          to: ${{ secrets.SMTP_TO }}
+          to: ${{ secrets.SMTP_FROM }}
           from: ${{ secrets.SMTP_FROM }}
 
       - name: Email on Deployment Failure
@@ -66,10 +66,10 @@ jobs:
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: ${{ secrets.SMTP_HOST }}
-          #server_port: ${{ secrets.SMTP_PORT }}
+          server_port: ${{ secrets.SMTP_PORT }}
           username: ${{ secrets.SMTP_USERNAME }}
           password: ${{ secrets.SMTP_PASSWORD }}
           subject: ❌ Deployment Failed
           body: Deployment failed.
-          to: ${{ secrets.SMTP_TO }}
+          to: ${{ secrets.SMTP_FROM }}
           from: ${{ secrets.SMTP_FROM }}
