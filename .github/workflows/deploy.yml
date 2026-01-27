@@ -39,7 +39,7 @@ jobs:
         tags: shrutikoranne/smtp-notification:latest
 
     #Step 6: ❌ BUILD FAILURE EMAIL
-    - name: Email – Build Failed
+    - name: Email - Build Failed
       if: failure()
       uses: dawidd6/action-send-mail@v3
       with:
@@ -49,7 +49,7 @@ jobs:
         password: ${{ secrets.SMTP_PASSWORD }}
         from: ${{ secrets.SMTP_FROM }}
         to: ${{ secrets.SMTP_TO }}
-        subject: "❌ Build Failed – Multi-Arch Docker"
+        subject: "❌ Build Failed - Multi-Arch Docker"
         body: |
           Docker image build FAILED.
 
@@ -74,7 +74,7 @@ jobs:
           docker run -d --name smtp-notification -p 3000:3000 shrutikoranne/smtp-notification:latest
 
  #Step 8: ✅ DEPLOYMENT SUCCESS EMAIL
-    - name: Email – Deployment Success
+    - name: Email - Deployment Success
       if: success()
       uses: dawidd6/action-send-mail@v3
       with:
@@ -84,7 +84,7 @@ jobs:
         password: ${{ secrets.SMTP_PASSWORD }}
         from: ${{ secrets.SMTP_FROM }}
         to: ${{ secrets.SMTP_TO }}
-        subject: "✅ Deployment Successful – EC2"
+        subject: "✅ Deployment Successful - EC2"
         body: |
           Deployment completed successfully 🎉
 
@@ -103,7 +103,7 @@ jobs:
         password: ${{ secrets.SMTP_PASSWORD }}
         from: ${{ secrets.SMTP_FROM }}
         to: ${{ secrets.SMTP_TO }}
-        subject: "❌ Deployment Failed – EC2"
+        subject: "❌ Deployment Failed - EC2"
         body: |
           Deployment to EC2 FAILED 🚨
 
