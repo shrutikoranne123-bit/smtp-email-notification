@@ -38,7 +38,29 @@ jobs:
         platforms: linux/amd64,linux/arm64
         tags: shrutikoranne/smtp-notification:latest
 
-    # Step 6: Deploy to EC2
+    #Step 6: ❌ BUILD FAILURE EMAIL
+    - name: Email – Build Failed
+      if: failure()
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: ${{ secrets.SMTP_HOST }}
+        server_port: ${{ secrets.SMTP_PORT }}
+        username: ${{ secrets.SMTP_USERNAME }}
+        password: ${{ secrets.SMTP_PASSWORD }}
+        from: ${{ secrets.SMTP_FROM }}
+        to: ${{ secrets.SMTP_TO }}
+        subject: "❌ Build Failed – Multi-Arch Docker"
+        body: |
+          Docker image build FAILED.
+
+          Repo: ${{ github.repository }}
+          Branch: ${{ github.ref_name }}
+          Commit: ${{ github.sha }}
+
+          Logs:
+          https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+    # Step 7: Deploy to EC2
     - name: Deploy to EC2
       uses: appleboy/ssh-action@v0.1.7
       with:
@@ -50,3 +72,43 @@ jobs:
           docker stop smtp-notification || true
           docker rm smtp-notification || true
           docker run -d --name smtp-notification -p 3000:3000 shrutikoranne/smtp-notification:latest
+
+ #Step 8: ✅ DEPLOYMENT SUCCESS EMAIL
+    - name: Email – Deployment Success
+      if: success()
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: ${{ secrets.SMTP_HOST }}
+        server_port: ${{ secrets.SMTP_PORT }}
+        username: ${{ secrets.SMTP_USERNAME }}
+        password: ${{ secrets.SMTP_PASSWORD }}
+        from: ${{ secrets.SMTP_FROM }}
+        to: ${{ secrets.SMTP_TO }}
+        subject: "✅ Deployment Successful – EC2"
+        body: |
+          Deployment completed successfully 🎉
+
+          App is running on EC2.
+          Image: shrutikoranne/arm64-test:latest
+          Commit: ${{ github.sha }}
+
+    #Step 9: ❌ DEPLOYMENT FAILURE EMAIL
+    - name: Email – Deployment Failed
+      if: failure()
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: ${{ secrets.SMTP_HOST }}
+        server_port: ${{ secrets.SMTP_PORT }}
+        username: ${{ secrets.SMTP_USERNAME }}
+        password: ${{ secrets.SMTP_PASSWORD }}
+        from: ${{ secrets.SMTP_FROM }}
+        to: ${{ secrets.SMTP_TO }}
+        subject: "❌ Deployment Failed – EC2"
+        body: |
+          Deployment to EC2 FAILED 🚨
+
+          Repo: ${{ github.repository }}
+          Commit: ${{ github.sha }}
+
+          Logs:
+          https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
