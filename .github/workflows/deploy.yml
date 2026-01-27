@@ -14,9 +14,6 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
-    - name: Force failure (test notifications)
-      run: exit 1
-
     # Step 2: Set up QEMU for multi-arch
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
