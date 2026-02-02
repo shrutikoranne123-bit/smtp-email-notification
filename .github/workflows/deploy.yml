@@ -74,6 +74,13 @@ jobs:
               -p 80:3000 \
               shrutikoranne/smtp-test:latest
 
+      - name: Debug SMTP FROM domain
+        run: |
+          echo "FROM domain: ${SMTP_FROM##*@}"
+        env:
+          SMTP_FROM: ${{ secrets.SMTP_FROM }}
+
+
       # ✅ Email on DEPLOY SUCCESS
       - name: Email – Deployment Success
         if: success()
