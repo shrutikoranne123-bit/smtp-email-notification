@@ -74,6 +74,14 @@ jobs:
               -p 80:3000 \
               shrutikoranne/smtp-test:latest
 
+      - name: Debug SMTP FROM (masked)
+        run: |
+          echo "SMTP_FROM is set"
+          echo "Length: ${#SMTP_FROM}"
+        env:
+          SMTP_FROM: ${{ secrets.SMTP_FROM }}
+
+
       - name: Debug SMTP FROM domain
         run: |
           echo "FROM domain: ${SMTP_FROM##*@}"
