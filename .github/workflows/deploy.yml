@@ -74,13 +74,16 @@ jobs:
               -p 80:3000 \
               shrutikoranne/smtp-test:latest
 
-      - name: Check SMTP_FROM presence
+      - name: Validate SMTP_FROM format
         run: |
-          if [ -z "${{ secrets.SMTP_FROM }}" ]; then
-            echo "SMTP_FROM is EMPTY"
+          if [[ "$SMTP_FROM" =~ ^[^@]+@[^@]+\.[^@]+$ ]]; then
+            echo "SMTP_FROM format looks VALID"
           else
-            echo "SMTP_FROM is SET"
+            echo "SMTP_FROM format looks INVALID"
           fi
+        env:
+          SMTP_FROM: ${{ secrets.SMTP_FROM }}
+
 
 
 
