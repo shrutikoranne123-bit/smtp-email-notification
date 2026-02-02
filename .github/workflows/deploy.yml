@@ -29,7 +29,7 @@ jobs:
         run: |
           docker buildx build \
             --platform linux/arm64 \
-            -t yourrepo/yourapp:latest \
+            -t shrutikoranne/smtp-test:latest \
             --push .
 
       # 🔔 Email on BUILD FAILURE
@@ -65,14 +65,14 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            docker pull yourrepo/yourapp:latest
-            docker stop myapp || true
-            docker rm myapp || true
+            docker pull shrutikoranne/smtp-test:latest
+            docker stop smtp-test || true
+            docker rm smtp-test || true
             docker run -d \
               --platform linux/arm64 \
-              --name myapp \
+              --name smtp-test \
               -p 80:3000 \
-              yourrepo/yourapp:latest
+              shrutikoranne/smtp-test:latest
 
       # ✅ Email on DEPLOY SUCCESS
       - name: Email – Deployment Success
