@@ -74,15 +74,16 @@ jobs:
               -p 80:3000 \
               shrutikoranne/smtp-test:latest
 
-      - name: Validate SMTP_FROM format
+      - name: Debug SMTP_FROM format
         run: |
-          if [[ "$SMTP_FROM" =~ ^[^@]+@[^@]+\.[^@]+$ ]]; then
-            echo "SMTP_FROM format looks VALID"
-          else
-            echo "SMTP_FROM format looks INVALID"
-          fi
+          echo "Length: ${#SMTP_FROM}"
+          echo "Contains @ : $( [[ "$SMTP_FROM" == *"@"* ]] && echo yes || echo no )"
+          echo "Contains . : $( [[ "$SMTP_FROM" == *"."* ]] && echo yes || echo no )"
+          echo "Starts with space: $( [[ "$SMTP_FROM" == " "* ]] && echo yes || echo no )"
+          echo "Ends with space: $( [[ "$SMTP_FROM" == *" " ]] && echo yes || echo no )"
         env:
           SMTP_FROM: ${{ secrets.SMTP_FROM }}
+
 
 
 
