@@ -74,12 +74,14 @@ jobs:
               -p 80:3000 \
               shrutikoranne/smtp-test:latest
 
-      - name: Debug SMTP FROM (masked)
+      - name: Check SMTP_FROM presence
         run: |
-          echo "SMTP_FROM is set"
-          echo "Length: ${#SMTP_FROM}"
-        env:
-          SMTP_FROM: ${{ secrets.SMTP_FROM }}
+          if [ -z "${{ secrets.SMTP_FROM }}" ]; then
+            echo "SMTP_FROM is EMPTY"
+          else
+            echo "SMTP_FROM is SET"
+          fi
+
 
 
       - name: Debug SMTP FROM domain
