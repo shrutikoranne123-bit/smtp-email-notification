@@ -64,7 +64,7 @@ jobs:
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           script: |
             docker pull shrutikoranne/smtp-test:latest
             docker stop smtp-test || true
@@ -83,7 +83,6 @@ jobs:
             --topic-arn "${{ secrets.SNS_TOPIC_ARN }}" \
             --subject "✅ Deployment Successful" \
             --message "Deployment SUCCESS
-            Commit: ${{ github.sha }}"
         env:
           AWS_REGION: ${{ secrets.AWS_REGION }}
 
