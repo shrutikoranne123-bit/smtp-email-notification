@@ -13,12 +13,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # ❌ TEMPORARY – force build failure
-      - name: Force Build Failure (Test Only)
-        run: |
-          echo "Forcing build failure test ❌"
-          exit 1
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -37,6 +31,10 @@ jobs:
             --platform linux/arm64 \
             -t shrutikoranne/smtp-test:latest \
             --push .
+
+      - name: Force Build Failure (TEST)
+        run: exit 1
+
 
       # 🔔 BUILD FAILURE → SNS
       - name: Notify Build Failure
