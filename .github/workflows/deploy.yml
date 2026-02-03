@@ -13,6 +13,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # ❌ TEMPORARY – force build failure
+      - name: Force Build Failure (Test Only)
+        run: |
+          echo "Forcing build failure test ❌"
+          exit 1
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -64,7 +70,7 @@ jobs:
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             docker pull shrutikoranne/smtp-test:latest
             docker stop smtp-test || true
