@@ -1,4 +1,4 @@
-name: ARM64 Build & Deploy with Email Notification
+name: ARM64 Build & Deploy with Notifications
 
 on:
   push:
@@ -32,32 +32,33 @@ jobs:
             -t shrutikoranne/smtp-test:latest \
             --push .
 
-      # 🔔 Email on BUILD FAILURE
-      - name: Email – Build Failed
+      # 🔔 BUILD FAILURE → SNS
+      - name: Notify Build Failure
         if: failure()
-        uses: dawidd6/action-send-mail@v3
-        with:
-          server_address: ${{ secrets.SMTP_HOST }}
-          server_port: ${{ secrets.SMTP_PORT }}
-          username: ${{ secrets.SMTP_USERNAME }}
-          password: ${{ secrets.SMTP_PASSWORD }}
-          subject: "❌ Build Failed – ARM64 Image"
-          body: |
-            The ARM64 Docker image build has FAILED.
-
-            Repository: ${{ github.repository }}
+        run: |
+          aws sns publish \
+            --topic-arn "${{ secrets.SNS_TOPIC_ARN }}" \
+            --subject "❌ Build Failed – ARM64 Image" \
+            --message "Build FAILED
+            Repo: ${{ github.repository }}
             Branch: ${{ github.ref_name }}
-            Commit: ${{ github.sha }}
-            Workflow: ${{ github.workflow }}
-          to: ${{ secrets.SMTP_TO }}
-          from: ${{ secrets.SMTP_FROM }}
+            Commit: ${{ github.sha }}"
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
 
   deploy:
-    name: Deploy to AMD64 EC2
+    name: Deploy to EC2
     runs-on: ubuntu-latest
     needs: build
 
     steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -74,60 +75,27 @@ jobs:
               -p 80:3000 \
               shrutikoranne/smtp-test:latest
 
-      - name: Debug SMTP_FROM format
-        run: |
-          echo "Length: ${#SMTP_FROM}"
-          echo "Contains @ : $( [[ "$SMTP_FROM" == *"@"* ]] && echo yes || echo no )"
-          echo "Contains . : $( [[ "$SMTP_FROM" == *"."* ]] && echo yes || echo no )"
-          echo "Starts with space: $( [[ "$SMTP_FROM" == " "* ]] && echo yes || echo no )"
-          echo "Ends with space: $( [[ "$SMTP_FROM" == *" " ]] && echo yes || echo no )"
-        env:
-          SMTP_FROM: ${{ secrets.SMTP_FROM }}
-
-
-
-
-
-      - name: Debug SMTP FROM domain
-        run: |
-          echo "FROM domain: ${SMTP_FROM##*@}"
-        env:
-          SMTP_FROM: ${{ secrets.SMTP_FROM }}
-
-
-      # ✅ Email on DEPLOY SUCCESS
-      - name: Email – Deployment Success
+      # ✅ DEPLOY SUCCESS → SNS
+      - name: Notify Deployment Success
         if: success()
-        uses: dawidd6/action-send-mail@v3
-        with:
-          server_address: ${{ secrets.SMTP_HOST }}
-          server_port: ${{ secrets.SMTP_PORT }}
-          username: ${{ secrets.SMTP_USERNAME }}
-          password: ${{ secrets.SMTP_PASSWORD }}
-          subject: "✅ Deployment Successful – ARM64 App"
-          body: |
-            Deployment completed successfully 🎉
+        run: |
+          aws sns publish \
+            --topic-arn "${{ secrets.SNS_TOPIC_ARN }}" \
+            --subject "✅ Deployment Successful" \
+            --message "Deployment SUCCESS
+            App is live 🎉
+            Commit: ${{ github.sha }}"
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
 
-            App is live on EC2.
-            Commit: ${{ github.sha }}
-            Environment: Production
-          to: ${{ secrets.SMTP_TO }}
-          from: ${{ secrets.SMTP_FROM }}
-
-      # ❌ Email on DEPLOY FAILURE
-      - name: Email – Deployment Failed
+      # ❌ DEPLOY FAILURE → SNS
+      - name: Notify Deployment Failure
         if: failure()
-        uses: dawidd6/action-send-mail@v3
-        with:
-          server_address: ${{ secrets.SMTP_HOST }}
-          server_port: ${{ secrets.SMTP_PORT }}
-          username: ${{ secrets.SMTP_USERNAME }}
-          password: ${{ secrets.SMTP_PASSWORD }}
-          subject: "❌ Deployment Failed – ARM64 App"
-          body: |
-            Deployment to EC2 FAILED.
-
-            Please check logs immediately.
-            Commit: ${{ github.sha }}
-          to: ${{ secrets.SMTP_TO }}
-          from: ${{ secrets.SMTP_FROM }}
+        run: |
+          aws sns publish \
+            --topic-arn "${{ secrets.SNS_TOPIC_ARN }}" \
+            --subject "❌ Deployment Failed" \
+            --message "Deployment FAILED
+            Commit: ${{ github.sha }}"
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
