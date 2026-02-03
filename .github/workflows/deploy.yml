@@ -90,7 +90,7 @@ jobs:
           aws sns publish \
             --topic-arn "${{ secrets.SNS_TOPIC_ARN }}" \
             --subject "✅ Deployment Successful" \
-            --message "Deployment SUCCESS
+            --message "Deployment SUCCESS"
         env:
           AWS_REGION: ${{ secrets.AWS_REGION }}
 
@@ -101,7 +101,7 @@ jobs:
           aws sns publish \
             --topic-arn "${{ secrets.SNS_TOPIC_ARN }}" \
             --subject "❌ Deployment Failed" \
-            --message "Deployment FAILED
-            Commit: ${{ github.sha }}"
+            --message "Deployment FAILED"
+            Commit: "${{ github.sha }}"
         env:
           AWS_REGION: ${{ secrets.AWS_REGION }}
